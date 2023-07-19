@@ -14,7 +14,7 @@ export default {
     className: {
       type: String,
       default: ''
-    }
+    },
   },
 
 }

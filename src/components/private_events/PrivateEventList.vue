@@ -3,7 +3,7 @@
     <h1>Private event</h1>
     <VButton v-bind:color="'green'" v-bind:text="'Add Event'" v-bind:link="'/add-event'">
     </VButton>
-    <div v-for="(event,index) in events" :key="index" class="event-card">
+    <div v-for="(event,index) in eventsShowing" :key="index" class="event-card">
       <div class="event-image">
         <swiper>
           <swiper-slide v-for="img in event.imgs" :key="img.url">
@@ -15,19 +15,14 @@
           }} photos </span>
       </div>
       <div class="event-details">
-<!--        <div>-->
-<!--              <icon-button v-bind:icon="'mdi-dots-vertical'" v-bind:color="'black'">-->
-<!--              </icon-button>-->
-<!--              <icon-button v-bind:icon="'mdi-pencil-circle'" v-bind:color="'orange'"-->
-<!--                           v-on:click="confirmDelete(event.id)"></icon-button>-->
-<!--              <icon-button v-bind:icon="'mdi-trash-can'" v-bind:color="'red'"-->
-<!--                           v-on:click="confirmDelete(event.id)"></icon-button>-->
-<!--        </div>-->
         <div>
-          <icon-button v-bind:icon="'mdi-dots-vertical'" v-bind:color="'black'" v-on:click="toggleDropdown"></icon-button>
+          <icon-button v-bind:icon="'mdi-dots-vertical'" v-bind:color="'black'"
+                       v-on:click="toggleDropdown"></icon-button>
           <div class="dropdown-menu" :class="{ hidden: !isDropdownOpen }">
-            <icon-button v-bind:icon="'mdi-pencil-circle'" v-bind:color="'orange'" v-on:click="confirmDelete(event.id)"></icon-button>
-            <icon-button v-bind:icon="'mdi-trash-can'" v-bind:color="'red'" v-on:click="confirmDelete(event.id)"></icon-button>
+            <VButton v-bind:color="'orange'" v-bind:text="'Update'" v-bind:link="'/update-event/'+ event.id">
+            </VButton>
+            <icon-button v-bind:icon="'mdi-trash-can'" v-bind:color="'red'"
+                         v-on:click="confirmDelete(event.id)"></icon-button>
           </div>
         </div>
         <h2 class="event-title"> {{ event.title }} </h2>
@@ -60,13 +55,17 @@
           </span>
           <p class="event-location">{{ event.price }}</p>
         </div>
-        <!--        <div>-->
-        <!--          <VButton v-bind:color="'orange'" v-bind:text="'Update'" v-bind:link="'/update-event/'+ event.id">-->
-        <!--          </VButton>-->
-        <!--          <icon-button v-bind:icon="'mdi-trash-can'" v-bind:color="'red'"-->
-        <!--                       v-on:click="confirmDelete(event.id)"></icon-button>-->
-        <!--        </div>-->
       </div>
+      <div>
+        <router-link :to="'/event-detail/' + event.id">view detail</router-link>
+      </div>
+    </div>
+    <div class="pagination">
+      <div class="page-number-container" v-for="(page, index) in totalPages" :key="index">
+        <span class="page-number" @click="toPage(index)"
+              v-bind:class="index === currentPage ? 'active' : ''"> {{ index + 1 }} </span>
+      </div>
+
     </div>
   </div>
 </template>
@@ -96,7 +95,11 @@ export default {
       links: [],
       colorIcon: "green",
       showModal: false,
-      isDropdownOpen: false
+      isDropdownOpen: false,
+      eventsShowing: [],
+      totalPages: [],
+      currentPage: 0,
+      eventNumberInPage: 3,
     }
   },
   async created() {
@@ -104,10 +107,27 @@ export default {
       if (res.status === 200) {
         console.log(res.data)
         this.events = res.data;
+        let totalPage = Math.round(this.events.length / this.eventNumberInPage);
+        this.totalPages = new Array(totalPage);
+        this.fillEventToTargetPage(this.currentPage, this.eventNumberInPage);
       }
     });
   },
+  mounted: {
+    updateTotalPage() {
+      let totalPage = Math.round(this.events.length / this.eventNumberInPage);
+      this.totalPages = new Array(totalPage);
+      console.log(this.totalPages);
+    }
+  },
   methods: {
+    fillEventToTargetPage(pageNumber, eventNumber) {
+      this.eventsShowing = this.events.slice(pageNumber * eventNumber, pageNumber * eventNumber + eventNumber);
+      this.currentPage = pageNumber;
+    },
+    toPage(pageNumber) {
+      this.fillEventToTargetPage(pageNumber, this.eventNumberInPage);
+    },
     async confirmDelete(eventId) {
       Swal.fire({
         title: 'Are you sure?',
@@ -146,6 +166,47 @@ export default {
 </script>
 
 <style scoped>
+.pagination {
+  background-color: whitesmoke;
+  display: flex;
+  align-items: center;
+  justify-content: left;
+  margin-top: 20px;
+  margin-left: 20px;
+  border-radius: 8px;
+  width: 800px;
+  height: 80px;
+}
+
+.page-number-container {
+  display: flex;
+}
+
+.page-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  margin: 0 5px;
+  background-color: white;
+  color: green;
+  border: 1px solid green;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.page-number:hover {
+  background-color: green;
+  color: white
+}
+
+.page-number.active {
+  background-color: green;
+  color: white;
+}
+
+
 #private-event {
   box-sizing: border-box;
   width: 100%;
@@ -232,7 +293,6 @@ export default {
   padding-left: 3px;
 }
 
-
 .add-button .link {
   text-decoration: none;
   color: white;
@@ -245,12 +305,13 @@ export default {
 .add-button .link:focus {
   outline: none;
 }
+
 .dropdown-menu {
   position: absolute;
   z-index: 1;
   background-color: white;
   min-width: 160px;
-  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
   padding: 12px;
   margin-top: 8px;
   display: block; /* set the initial display property to block */

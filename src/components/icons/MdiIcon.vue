@@ -1,12 +1,15 @@
 <template>
   <div :class="classes">
-    <svg-icon :path="path" ></svg-icon>
+    <svg-icon
+        :path="path"
+    ></svg-icon>
   </div>
 </template>
 
 <script>
 import SvgIcon from "../icons/SvgIcon";
 import get from "lodash/get";
+
 
 export default {
   components: {SvgIcon},

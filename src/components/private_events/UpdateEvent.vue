@@ -93,7 +93,6 @@ export default {
     }
   },
   async created() {
-    console.log("id" + this.id);
     await this.$http.get('/v1/private_event/' + this.id).then((res) => {
       if (res.status === 200) {
         console.log(res.data)

@@ -1,27 +1,26 @@
 <template>
-  <div class="icon-button-container"  @click="handleClick">
-    <mdi-icon
-        :icon="icon"
-        :class="classes"
-        :color="color"
-    >
-    </mdi-icon>
+  <div class="icon-button-container" @click="handleClick">
+      <mdi-icon
+          :icon="icon"
+          :class="classes"
+          :color="color"
+      >
+      </mdi-icon>
   </div>
 </template>
 
 <script>
-import SvgIcon from "../icons/SvgIcon";
 import MdiIcon from "../icons/MdiIcon";
 
 export default {
   name: "IconButton",
   components: {
     MdiIcon,
-    "svg-icon": SvgIcon,
   },
   props: {
     icon: String,
-    color: String
+    color: String,
+    link: String,
   },
   computed: {
     classes() {
